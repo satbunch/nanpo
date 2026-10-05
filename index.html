@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>駅徒歩マップ</title>
+    <style>
+      html, body { height: 100%; margin: 0; font-family: system-ui, sans-serif; }
+      body { display: flex; }
+      #panel { width: 280px; padding: 12px; box-sizing: border-box; display: flex; flex-direction: column; gap: 10px; overflow-y: auto; }
+      #panel h1 { font-size: 18px; margin: 0; }
+      #search { display: flex; gap: 4px; }
+      #q { flex: 1; min-width: 0; }
+      label { display: flex; flex-direction: column; gap: 4px; font-size: 14px; }
+      #status { font-size: 13px; color: #555; margin: 0; }
+      .hint { font-size: 12px; color: #777; margin: 0; }
+      #map { flex: 1; }
+      .leaflet-container.walk-hover:not(.leaflet-dragging) { cursor: pointer; }
+      /* Leaflet の tooltip は地図コンテナの overflow で切れるので、地図の外に置く */
+      #walk-tip {
+        position: fixed;
+        z-index: 10000;
+        left: 0;
+        top: 0;
+        pointer-events: none;
+        background: #fff;
+        color: #1a1a1a;
+        border: 1px solid rgba(0, 0, 0, 0.35);
+        border-radius: 4px;
+        padding: 3px 8px;
+        font-size: 13px;
+        line-height: 1.4;
+        box-shadow: 0 1px 5px rgba(0, 0, 0, 0.35);
+        white-space: nowrap;
+        user-select: none;
+      }
+      #walk-tip i {
+        display: inline-block;
+        width: 12px;
+        height: 12px;
+        margin-right: 6px;
+        vertical-align: middle;
+        border-radius: 2px;
+      }
+      .stale { opacity: 0.35; transition: opacity 0.2s; }
+      body.loading #status::before {
+        content: ""; display: inline-block; width: 12px; height: 12px; margin-right: 6px;
+        vertical-align: -2px; border: 2px solid #ccc; border-top-color: #333; border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+      }
+      @keyframes spin { to { transform: rotate(360deg); } }
+      @media (max-width: 640px) { body { flex-direction: column; } #panel { width: auto; } }
+    </style>
+  </head>
+  <body>
+    <div id="panel">
+      <h1>駅徒歩マップ</h1>
+      <form id="search">
+        <input id="q" type="text" placeholder="駅名・住所で検索" />
+        <button type="submit">検索</button>
+      </form>
+      <label>
+        徒歩 <output id="minutes-out">10</output> 分
+        <input id="minutes" type="range" min="1" max="20" value="10" />
+      </label>
+      <label>
+        1分あたり <input id="mpm" type="number" min="1" value="80" /> m
+      </label>
+      <p class="hint">地図をダブルクリックすると起点を変更できるよ。色のついた道にカーソルを合わせると、その地点の徒歩分数が出るよ</p>
+      <p id="status"></p>
+      <div id="legend"></div>
+    </div>
+    <div id="map"></div>
+    <div id="walk-tip" role="tooltip" hidden><i aria-hidden="true"></i><span></span></div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
